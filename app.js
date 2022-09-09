@@ -11,7 +11,8 @@ const io = require('socket.io')(server, {
   },
 });
 
-const IS_DEV_MODE = false;
+const IS_DEV_MODE = process.env.DEV;
+if (IS_DEV_MODE) console.log('This is local develop env, visit port 3000 pls.');
 
 const port = process.env.PORT || 4000;
 const uri = 'mongodb+srv://demo:1234@cluster0.30iqypb.mongodb.net/?retryWrites=true&w=majority';
@@ -41,7 +42,10 @@ async function updateMessages(msg) {
   const owner = getMsgOwner(msg);
   console.log('updateMessages: ', msg);
   try {
-    await client.db('demo').collection('messages').updateOne({ owner }, { $push: { messages: msg } }, { upsert: true });
+    await client
+      .db('demo')
+      .collection('messages')
+      .updateOne({ owner }, { $push: { messages: msg } }, { upsert: true });
   } catch (error) {
     console.error(error);
   }
@@ -56,10 +60,11 @@ io.on('connection', (socket) => {
   socket.on('get-message', async ({ isGroupMsg, sender, receiver }) => {
     const owner = getMsgOwner({ isGroupMsg, sender, receiver });
     try {
-      const msgItem = await client.db('demo').collection('messages').findOne({ owner });
-      io
-        .to(sender)
-        .emit('return-get-message', msgItem?.messages);
+      const msgItem = await client
+        .db('demo')
+        .collection('messages')
+        .findOne({ owner });
+      io.to(sender).emit('return-get-message', msgItem?.messages);
     } catch (error) {
       console.error(error);
     }
@@ -68,9 +73,7 @@ io.on('connection', (socket) => {
   socket.on('send-message', async (msg) => {
     const { receiver } = msg;
     await updateMessages(msg);
-    socket
-      .to(receiver)
-      .emit('return-send-message', msg);
+    socket.to(receiver).emit('return-send-message', msg);
   });
 
   // TODO 删除消息
@@ -79,7 +82,9 @@ io.on('connection', (socket) => {
 
 app.use(express.static('./client/build'));
 
-const htmlPath = `${__dirname}/client/${IS_DEV_MODE ? 'public' : 'build'}/index.html`;
+const htmlPath = `${__dirname}/client/${
+  IS_DEV_MODE ? 'public' : 'build'
+}/index.html`;
 app.get('*', (_, res) => {
   res.sendFile(htmlPath);
 });

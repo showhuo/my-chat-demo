@@ -39,7 +39,8 @@ function App() {
 
   useEffect(() => {
     const callback = (messages) => {
-      setCurrentChatData(messages);
+      console.log(messages);
+      setCurrentChatData(messages || []);
     };
     socket.on("return-get-message", callback);
 
