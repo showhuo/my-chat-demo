@@ -5,10 +5,9 @@ const app = express();
 const http = require('http');
 
 const server = http.Server(app);
-const io = require('socket.io')(http, {
+const io = require('socket.io')(server, {
   cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
+    origin: '*',
   },
 });
 
@@ -25,7 +24,7 @@ async function connectToDB() {
     await client.connect();
     console.log('connectToDB successfully');
   } catch (err) {
-    console.log(err);
+    console.error(err);
     client.close();
   }
 }
@@ -38,20 +37,30 @@ function getMsgOwner(msg) {
 
 async function updateMessages(msg) {
   const owner = getMsgOwner(msg);
-  await client.db('demo').collection('messages').updateOne({ owner }, { $push: { messages: msg } }, { upsert: true });
+  console.log('updateMessages: ', msg);
+  try {
+    await client.db('demo').collection('messages').updateOne({ owner }, { $push: { messages: msg } }, { upsert: true });
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 io.on('connection', (socket) => {
   const { username = 'userA' } = socket.handshake.auth;
+  console.log('user connected: ', username);
   socket.join(username);
   socket.join('groupA'); // 简化实现，假设大家都是groupA成员
   // 查询对话
   socket.on('get-message', async ({ isGroupMsg, sender, receiver }) => {
     const owner = getMsgOwner({ isGroupMsg, sender, receiver });
-    const msgItem = await client.db('demo').collection('messages').findOne({ owner });
-    io
-      .to(sender)
-      .emit('return-get-message', msgItem?.messages);
+    try {
+      const msgItem = await client.db('demo').collection('messages').findOne({ owner });
+      io
+        .to(sender)
+        .emit('return-get-message', msgItem?.messages);
+    } catch (error) {
+      console.error(error);
+    }
   });
   // 发送对话
   socket.on('send-message', async (msg) => {
@@ -73,10 +82,5 @@ app.get('*', (req, res) => {
 });
 
 server.listen(port, async () => {
-  http.get({ host: 'api.ipify.org', port: 80, path: '/' }, (resp) => {
-    resp.on('data', (ip) => {
-      console.log(`My public IP address is: ${ip}`);
-      console.log(`Socket.IO server running at ${`${ip}:${port}`}`);
-    });
-  });
+  console.log(`Socket.IO server running at ${port}`);
 });
