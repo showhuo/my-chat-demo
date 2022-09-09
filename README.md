@@ -24,11 +24,16 @@
 ## 如何描述一个对话（collection messages）？
 ```
 {
-    owner:userA-userB,
+    owner: userA-userB,
+    messages: Message[]
+}
+
+{
+    owner: groupA,
     messages: Message[]
 }
 ```
-无论是 A 发给 B，还是 B 发给 A，通过`[nameA,nameB].sort().join('-')`获得相同的 owner key，因此只需要维护一个对话数据
+无论是 A 发给 B，还是 B 发给 A，通过`[nameA,nameB].sort().join('-')`获得相同的 owner key
 ## 群聊
 
  socket.io 的 room 刚好可以表达 group 的概念，使用 io.to(room) 转发群消息

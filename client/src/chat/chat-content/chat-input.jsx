@@ -16,6 +16,7 @@ export default function ChatInput({
 
   useEffect(() => {
     if (quote) setShowQuote(true);
+    textAreaRef.current.focus();
   }, [quote]);
 
   const handleInputChange = (e) => {
