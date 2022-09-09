@@ -1,77 +1,48 @@
 # Data
 
-## 如何描述一个 user（collection users）
+## 简化
 
-```
-{
-    name: userA,
-    contacts: User[],
-    groups: Group[],
-    activeChats: User/Group[],
-}
-```
+假设总共只有 3 个用户，1 个 group
 
-## 描述一个group（collection groups）
-```
-{
-    name: groupA,
-    members: User[]
-}
-```
+根据 url 参数 `?username=userA` 表明是用户A，其他用户同理
 
-## 如何描述一个对话？（collection messages）
+## 如何描述一条消息？
  
 ```
-type Message = {
+{
     id,
     isGroupMsg,
     time,
     sender,
     receiver,
-    isQuote,
     body,
     quote,
 }
 
-// 理想情况下，用这种方式存储所有对话，是最快的
-{
-    userA-userB: messages
-    groupA: messages
-}
-
-// 但是为了可扩展性考虑，用以下document形式描述对话：
-{
-    owner: userA-userB/groupA,
-    messages: Message[]
-}
-
-
 ```
 
+## 如何描述一个对话（collection messages）？
+```
+{
+    owner:userA-userB,
+    messages: Message[]
+}
+```
+无论是 A 发给 B，还是 B 发给 A，通过`[nameA,nameB].sort().join('-')`获得相同的 owner key，因此只需要维护一个对话数据
 ## 群聊
 
-发消息给 group，先更新 group messages队列
-然后根据group members(另一个collection)转发，让他们重新请求消息或者直接尾巴加一条消息？
-
-## 未读消息
-
-TODO
-A 发给 B，server 检查 B 当前的活跃窗口，如果不是 B-A 对话，那么更新 B 的 chatList 里面，A 的 unreadCount 属性
+ socket.io 的 room 刚好可以表达 group 的概念，使用 io.to(room) 转发群消息
 
 ## 如何渲染？
 
-message 里包含 sender 和 receiver，如果 sender 是我，渲染浅灰色，否则浅绿色
-isQuote 渲染额外的 quote 层，用 absolute 定位悬浮在输入框
+message 里包含 sender 和 receiver，根据 sender 是否为 currentUser 渲染不同背景色
 
-## 如何 quote？
+## 如何处理 quote？
 
-quote 属于 message 的一种，由 isQuote 和 quote 标识
+quote 属于 message 的一个属性，渲染时作为一个独立的 div，跟着 message 或者 input
 
-## 安全问题
+## 安全问题 TODO
 
-server 收到数据需要先 sanitize 消毒
+用户输入的、server 收到的数据需要先 sanitize 消毒，防止恶意脚本/语句
 
-## 简化
 
-假设总共只有 5 个用户，1 个 group，总计 6 个对话
-访问/userA 就表明是用户 A，其他 4 个用户同理

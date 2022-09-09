@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { currentUser } from "../../../context";
+import { currentUser } from "../../../config";
 import Avatar from "./avatar";
 import Quote from "./quote";
 

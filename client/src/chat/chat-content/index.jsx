@@ -7,6 +7,7 @@ export default function ChatContent({
   messages,
   isGroupMsg,
   setCurrentChatData,
+  updateBrief,
 }) {
   const [quote, setQuote] = useState();
 
@@ -22,6 +23,7 @@ export default function ChatContent({
         quote={quote}
         isGroupMsg={isGroupMsg}
         setCurrentChatData={setCurrentChatData}
+        updateBrief={updateBrief}
       />
     </div>
   );

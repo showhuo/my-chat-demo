@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import { useEffect, useState } from "react";
-import { currentUser, socket } from "../../context";
+import { currentUser, socket } from "../../config";
 import Quote from "./message/quote";
 
 export default function ChatInput({
@@ -8,6 +8,7 @@ export default function ChatInput({
   quote,
   isGroupMsg,
   setCurrentChatData,
+  updateBrief,
 }) {
   const [inputValue, setInputValue] = useState();
   const [showQuote, setShowQuote] = useState(false);
@@ -38,9 +39,19 @@ export default function ChatInput({
       newData.push(data);
       return newData;
     });
+    updateBrief(data, true);
     setInputValue("");
     setShowQuote(false);
-  }, [inputValue, isGroupMsg, quote, receiver, setCurrentChatData, showQuote]);
+    textAreaRef.current.focus();
+  }, [
+    inputValue,
+    isGroupMsg,
+    quote,
+    receiver,
+    setCurrentChatData,
+    showQuote,
+    updateBrief,
+  ]);
 
   useEffect(() => {
     const callback = (event) => {
@@ -60,6 +71,10 @@ export default function ChatInput({
   const deleteQuote = () => {
     setShowQuote(false);
   };
+
+  useEffect(() => {
+    textAreaRef.current.focus();
+  }, [receiver]);
 
   return (
     <div className="chat-input">

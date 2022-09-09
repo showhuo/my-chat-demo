@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import "./App.scss";
 import ChatContent from "./chat/chat-content";
 import ChatList from "./chat/chat-list";
-import { currentUser, socket } from "./context";
+import { currentUser, socket } from "./config";
 
 function App() {
   const [currentChat, setCurrentChat] = useState("userA");
@@ -33,6 +33,10 @@ function App() {
   }, [currentChat]);
 
   useEffect(() => {
+    getCurrentChatData();
+  }, [currentChat, getCurrentChatData]);
+
+  useEffect(() => {
     const callback = (messages) => {
       setCurrentChatData(messages);
     };
@@ -43,16 +47,8 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
-    getCurrentChatData();
-  }, [currentChat, getCurrentChatData]);
-
-  // 收到更新指定对话的数据
-  // 如果是当前对话，push当前消息
-  // 如果不是，更新brief消息
-  useEffect(() => {
-    const callback = (message) => {
-      console.log(message);
+  const pushToCurrentData = useCallback(
+    (message) => {
       const { sender, receiver, isGroupMsg } = message;
       if (
         (!isGroupMsg && sender === currentChat) ||
@@ -62,46 +58,40 @@ function App() {
         const newData = currentChatData.slice();
         newData.push(message);
         setCurrentChatData(newData);
-      } else {
-        const { sender, body } = message;
-        const brief = sender + ": " + body;
-        const newChatList = chatList.slice();
-        const idx = chatList.findIndex((c) => {
-          if (isGroupMsg) return c.name === receiver;
-          return c.name === sender;
-        });
-        const newChat = { ...newChatList[idx] };
-        newChat.briefMsg = brief;
-        newChatList.splice(idx, 1, newChat);
-        setChatList(newChatList);
       }
-    };
+    },
+    [currentChat, currentChatData]
+  );
 
+  const updateBrief = useCallback(
+    (message, fromMe) => {
+      const { sender, receiver, body, isGroupMsg } = message;
+      const brief = sender + ": " + body;
+      const newChatList = chatList.slice();
+      const idx = chatList.findIndex((c) => {
+        if (fromMe || isGroupMsg) return c.name === receiver;
+        return c.name === sender;
+      });
+      const newChat = { ...newChatList[idx] };
+      newChat.briefMsg = brief;
+      newChatList.splice(idx, 1, newChat);
+      setChatList(newChatList);
+    },
+    [chatList]
+  );
+
+  useEffect(() => {
+    const callback = (message) => {
+      console.log(message);
+      pushToCurrentData(message);
+      updateBrief(message);
+    };
     socket.on("return-send-message", callback);
 
     return () => {
       socket.off("return-send-message", callback);
     };
-  }, [chatList, currentChat, currentChatData]);
-
-  // TODO 收到要求删除的消息，如果需要删除的信息，不属于当前对话，则忽略
-  useEffect(() => {
-    const callback = (message) => {
-      const { sender, receiver, isGroupMsg } = message;
-      if (!isGroupMsg && sender !== currentChat) return;
-      if (isGroupMsg && receiver !== currentChat) return;
-      const { _id } = message;
-      const idx = currentChatData.findIndex({ _id });
-      const newChatData = currentChatData.slice();
-      newChatData.splice(idx, 1);
-      setCurrentChatData(newChatData);
-    };
-    socket.on("delete-message", callback);
-
-    return () => {
-      socket.off("delete-message", callback);
-    };
-  }, [currentChat, currentChatData]);
+  }, [pushToCurrentData, updateBrief]);
 
   return (
     <div className="App">
@@ -115,6 +105,7 @@ function App() {
         currentChat={currentChat}
         messages={currentChatData}
         setCurrentChatData={setCurrentChatData}
+        updateBrief={updateBrief}
       />
     </div>
   );

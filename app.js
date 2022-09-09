@@ -11,6 +11,8 @@ const io = require('socket.io')(server, {
   },
 });
 
+const IS_DEV_MODE = false;
+
 const port = process.env.PORT || 4000;
 const uri = 'mongodb+srv://demo:1234@cluster0.30iqypb.mongodb.net/?retryWrites=true&w=majority';
 const client = new MongoClient(uri, {
@@ -77,8 +79,9 @@ io.on('connection', (socket) => {
 
 app.use(express.static('./client/build'));
 
-app.get('*', (req, res) => {
-  res.sendFile(`${__dirname}/client/build/index.html`);
+const htmlPath = `${__dirname}/client/${IS_DEV_MODE ? 'public' : 'build'}/index.html`;
+app.get('*', (_, res) => {
+  res.sendFile(htmlPath);
 });
 
 server.listen(port, async () => {
