@@ -6,7 +6,7 @@ import ChatList from "./chat/chat-list";
 import { currentUser, socket } from "./config";
 
 function App() {
-  const [currentChat, setCurrentChat] = useState("userA");
+  const [currentChat, setCurrentChat] = useState();
   const [currentChatData, setCurrentChatData] = useState([]);
   const [chatList, setChatList] = useState([
     { name: "", avatarUrl: "", briefMsg: "" },
@@ -22,6 +22,7 @@ function App() {
         briefMsg: "",
       }));
     setChatList(fakeChatList);
+    setCurrentChat(fakeChatList[0].name);
   }, []);
 
   const getCurrentChatData = useCallback(() => {

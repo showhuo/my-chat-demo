@@ -46,8 +46,19 @@ message 里包含 sender 和 receiver，根据 sender 是否为 currentUser 渲�
 
 quote 属于 message 的一个属性，渲染时作为一个独立的 div，跟着 message 或者 input
 
-## 安全问题 TODO
+# TODO
 
-用户输入的、server 收到的数据需要先 sanitize 消毒，防止恶意脚本/语句
+安全问题：用户输入的、server 收到的数据需要先 sanitize 消毒，防止恶意脚本/语句
+
+删除消息
+
+未读消息数量
+
+@someone
+
+WebRTC 音视频，屏幕共享
+
+……
+
 
 
