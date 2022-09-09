@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useCallback } from "react";
 import "./App.scss";
 import ChatContent from "./chat/chat-content";
-import ChatList from "./chat/chat-list";
+import ChatList from "./chat/chat-list/index";
 import { currentUser, socket } from "./config";
 
 function App() {

@@ -3,7 +3,7 @@ export default function Quote({ quote }) {
     <div className="quote-container">
       <div className="quote-msg">
         <div className="bar" />
-        <div>{quote?.body}</div>
+        <div className="the-msg">{quote?.body}</div>
       </div>
     </div>
   );

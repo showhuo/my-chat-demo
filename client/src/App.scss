@@ -51,7 +51,10 @@
         }
 
         .brief {
+          white-space: nowrap;
+          overflow: hidden;
           text-overflow: ellipsis;
+          width: 20rem;
         }
       }
     }
@@ -185,6 +188,12 @@
         background: #04b17d;
         border-radius: 2rem;
         margin-right: 1rem;
+      }
+      .the-msg {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 35rem;
       }
     }
 

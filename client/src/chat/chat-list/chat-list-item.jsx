@@ -1,4 +1,4 @@
-import Avatar from "./chat-content/message/avatar";
+import Avatar from "../chat-content/message/avatar";
 
 export default function ChatListItem({ item, isActive, onClick }) {
   const { name, avatarUrl, briefMsg, time } = item;
@@ -13,7 +13,7 @@ export default function ChatListItem({ item, isActive, onClick }) {
           <span className="name">{name}</span>
           <span>{time}</span>
         </div>
-        <span className="latest-msg">{briefMsg}</span>
+        <div className="brief">{briefMsg}</div>
       </div>
     </div>
   );
