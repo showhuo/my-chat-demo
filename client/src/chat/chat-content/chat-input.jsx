@@ -21,7 +21,9 @@ export default function ChatInput({
 
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
-    textAreaRef.current.style.height = textAreaRef.current.scrollHeight + "px";
+    if (textAreaRef.current.clientHeight < textAreaRef.current.scrollHeight)
+      textAreaRef.current.style.height =
+        textAreaRef.current.scrollHeight + "px";
   };
 
   const submit = useCallback(() => {

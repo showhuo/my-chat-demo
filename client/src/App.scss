@@ -67,7 +67,7 @@
     background-color: #26252d;
 
     .chat-body {
-      height: calc(100vh - 15rem);
+      height: calc(100vh - 25rem);
       overflow: auto;
 
       .title {
@@ -199,14 +199,18 @@
 
     .chat-input {
       position: relative;
-      height: 15rem;
+      height: 25rem;
       padding-bottom: 3rem;
+      background-color: #fff;
 
       .text-area {
         width: 100%;
         padding: 1.5rem 2rem;
         resize: none;
         height: 4.8rem;
+        max-height: 18rem;
+        border: none;
+        outline: none;
       }
       .with-delete-quote {
         height: 6rem;
