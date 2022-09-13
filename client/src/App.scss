@@ -201,7 +201,8 @@
       position: relative;
       height: 25rem;
       padding-bottom: 3rem;
-      background-color: #fff;
+      background-color: #26252d;
+      border-top: 1px rgba(255, 255, 255, 0.1) solid;
 
       .text-area {
         width: 100%;
@@ -211,6 +212,8 @@
         max-height: 18rem;
         border: none;
         outline: none;
+        background-color: #26252d;
+        color: #fff;
       }
       .with-delete-quote {
         height: 6rem;

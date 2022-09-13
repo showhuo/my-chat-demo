@@ -14,10 +14,14 @@ export default function ChatInput({
   const [showQuote, setShowQuote] = useState(false);
   const textAreaRef = useRef();
 
+  const focusInput = useCallback(() => {
+    textAreaRef.current?.focus();
+  }, []);
+
   useEffect(() => {
     if (quote) setShowQuote(true);
-    textAreaRef.current.focus();
-  }, [quote]);
+    focusInput();
+  }, [focusInput, quote]);
 
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
@@ -45,8 +49,9 @@ export default function ChatInput({
     updateBrief(data, true);
     setInputValue("");
     setShowQuote(false);
-    textAreaRef.current.focus();
+    focusInput();
   }, [
+    focusInput,
     inputValue,
     isGroupMsg,
     quote,
@@ -76,11 +81,11 @@ export default function ChatInput({
   };
 
   useEffect(() => {
-    textAreaRef.current.focus();
-  }, [receiver]);
+    focusInput();
+  }, [focusInput, receiver]);
 
   return (
-    <div className="chat-input">
+    <div className="chat-input" onClick={focusInput}>
       <textarea
         ref={textAreaRef}
         className="text-area"
