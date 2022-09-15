@@ -8,21 +8,47 @@ import { currentUser, socket } from "./config";
 function App() {
   const [currentChat, setCurrentChat] = useState();
   const [currentChatData, setCurrentChatData] = useState([]);
+  const [conversationId, setConversationId] = useState();
   const [chatList, setChatList] = useState([
-    { name: "", avatarUrl: "", briefMsg: "" },
+    { name: "", avatarUrl: "", briefMsg: "", conversationId: "" },
   ]);
 
-  // 简化实现，假设只有固定的几个对话
   useEffect(() => {
-    const fakeChatList = ["userA", "userB", "userC", "groupA"]
-      .filter((name) => name !== currentUser)
-      .map((name) => ({
-        name,
-        avatarUrl: "",
-        briefMsg: "",
-      }));
-    setChatList(fakeChatList);
-    setCurrentChat(fakeChatList[0].name);
+    socket.emit("get-conversations");
+  }, []);
+
+  const getNameFromConversation = (conversation) => {
+    if (conversation?.participants.length > 2) {
+      return "groupA";
+    } else {
+      for (const participant of conversation?.participants) {
+        if (participant !== currentUser) {
+          return participant;
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    const callback = (conversations) => {
+      console.log("return-get-conversations", conversations);
+      const convertedChatList = (conversations || []).map((c) => {
+        return {
+          name: getNameFromConversation(c),
+          avatarUrl: "",
+          briefMsg: "",
+          conversationId: c._id,
+        };
+      });
+      setChatList(convertedChatList || []);
+      setConversationId(conversations[0]?._id);
+      setCurrentChat(getNameFromConversation(conversations[0]));
+    };
+    socket.on("return-get-conversations", callback);
+
+    return () => {
+      socket.off("return-get-conversations", callback);
+    };
   }, []);
 
   const getCurrentChatData = useCallback(() => {
@@ -30,8 +56,9 @@ function App() {
       isGroupMsg: currentChat?.includes("group"), // 简化实现
       sender: currentUser,
       receiver: currentChat,
+      conversationId,
     });
-  }, [currentChat]);
+  }, [conversationId, currentChat]);
 
   useEffect(() => {
     getCurrentChatData();
@@ -39,7 +66,7 @@ function App() {
 
   useEffect(() => {
     const callback = (messages) => {
-      console.log(messages);
+      console.log("return-get-message", messages);
       setCurrentChatData(messages || []);
     };
     socket.on("return-get-message", callback);
@@ -84,7 +111,7 @@ function App() {
 
   useEffect(() => {
     const callback = (message) => {
-      console.log(message);
+      console.log("return-send-message", message);
       pushToCurrentData(message);
       updateBrief(message);
     };
@@ -101,6 +128,7 @@ function App() {
         chatList={chatList}
         currentChat={currentChat}
         setCurrentChat={setCurrentChat}
+        setConversationId={setConversationId}
       />
       <ChatContent
         isGroupMsg={currentChat?.includes("group")}
@@ -108,6 +136,7 @@ function App() {
         messages={currentChatData}
         setCurrentChatData={setCurrentChatData}
         updateBrief={updateBrief}
+        conversationId={conversationId}
       />
     </div>
   );

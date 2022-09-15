@@ -2,10 +2,13 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const { mongoClient } = require('./mongo-client');
-const { getMsgOwner, updateMessages } = require('./utils');
+const { updateMessages, initFakeData } = require('./utils');
 
 const app = express();
 const server = http.Server(app);
+
+initFakeData(mongoClient);
+
 const io = socketIo(server, {
   cors: {
     origin: '*',
@@ -22,21 +25,37 @@ io.on('connection', (socket) => {
   socket.join(username);
   socket.join('groupA'); // 简化实现，假设大家都是groupA成员
 
-  // 查询对话
-  socket.on('get-message', async ({ isGroupMsg, sender, receiver }) => {
-    const owner = getMsgOwner({ isGroupMsg, sender, receiver });
+  // 查询所有对话
+  socket.on('get-conversations', async () => {
     try {
-      const msgItem = await mongoClient
-        .db('demo')
-        .collection('messages')
-        .findOne({ owner });
-      io.to(sender).emit('return-get-message', msgItem?.messages);
+      console.log('get-conversations:', username);
+      const cursor = mongoClient.db('demo').collection('conversations').find({ participants: username });
+      const length = await cursor.count();
+      const res = await cursor.toArray();
+      // console.log('conversations:', res);
+
+      io.to(username).emit('return-get-conversations', length ? res : []);
     } catch (error) {
       console.error(error);
     }
   });
 
-  // 发送对话
+  // 查询消息
+  socket.on('get-message', async ({
+    sender, conversationId,
+  }) => {
+    try {
+      const msgItemsCursor = mongoClient
+        .db('demo')
+        .collection('messages')
+        .find({ conversationId });
+      io.to(sender).emit('return-get-message', await msgItemsCursor.count() ? await msgItemsCursor.toArray() : []);
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+  // 发送消息
   socket.on('send-message', async (msg) => {
     const { receiver } = msg;
     await updateMessages(mongoClient, msg);

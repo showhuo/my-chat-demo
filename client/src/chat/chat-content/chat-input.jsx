@@ -4,11 +4,12 @@ import { currentUser, socket } from "../../config";
 import Quote from "./message/quote";
 
 export default function ChatInput({
-  receiver,
+  currentChat,
   quote,
   isGroupMsg,
   setCurrentChatData,
   updateBrief,
+  conversationId,
 }) {
   const [inputValue, setInputValue] = useState();
   const [showQuote, setShowQuote] = useState(false);
@@ -35,10 +36,11 @@ export default function ChatInput({
     const data = {
       time: Date.now(),
       sender: currentUser,
-      receiver,
+      receiver: currentChat,
       isGroupMsg,
       body: inputValue,
       quote: showQuote ? quote : null,
+      conversationId,
     };
     socket.emit("send-message", data);
     setCurrentChatData((prevData) => {
@@ -51,14 +53,15 @@ export default function ChatInput({
     setShowQuote(false);
     focusInput();
   }, [
-    focusInput,
     inputValue,
+    currentChat,
     isGroupMsg,
-    quote,
-    receiver,
-    setCurrentChatData,
     showQuote,
+    quote,
+    conversationId,
+    setCurrentChatData,
     updateBrief,
+    focusInput,
   ]);
 
   useEffect(() => {
@@ -82,7 +85,7 @@ export default function ChatInput({
 
   useEffect(() => {
     focusInput();
-  }, [focusInput, receiver]);
+  }, [focusInput, currentChat]);
 
   return (
     <div className="chat-input" onClick={focusInput}>
