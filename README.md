@@ -6,9 +6,19 @@
 
 根据 url 参数 `?username=userA` 表明是用户A，其他用户同理
 
+真实情况下可以使用独立的collection users描述
+```ts
+{
+    _id,
+    name,
+    avatar,
+    contacts: User[]
+}
+```
+
 ## 如何描述一条消息（collection messages）？
  
-```
+```js
 {
     id,
     isGroupMsg,
@@ -17,13 +27,13 @@
     receiver,
     body,
     quote,
-    conversationId
+    conversationId // 建立索引，方便根据conversationId查找messages
 }
 
 ```
 
 ## 如何描述一个对话（collection conversations）？
-```
+```js
 {
     _id: conversationId,
     participants: ['userA','userB']

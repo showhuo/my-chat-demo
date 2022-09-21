@@ -10,8 +10,6 @@ async function updateMessages(mongoClient, msg) {
       .db('demo')
       .collection('messages')
       .insertOne(msg);
-    // 创建一个简单的index
-    mongoClient.db('demo').collection('messages').createIndex({ conversationId: 1 });
   } catch (error) {
     console.error(error);
   }

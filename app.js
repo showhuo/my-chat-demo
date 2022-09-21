@@ -49,6 +49,7 @@ io.on('connection', (socket) => {
         .db('demo')
         .collection('messages')
         .find({ conversationId });
+        // TODO 可以按需查询，比如每次只查20条，前端可配合实现无限列表
       io.to(sender).emit('return-get-message', await msgItemsCursor.count() ? await msgItemsCursor.toArray() : []);
     } catch (error) {
       console.error(error);
