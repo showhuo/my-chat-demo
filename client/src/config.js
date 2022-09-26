@@ -3,10 +3,10 @@ import throttle from "lodash.throttle";
 
 // rem
 window.onload = function () {
-  getRem(1920, 10);
+  getRem(3840, 10);
 };
 window.onresize = throttle(() => {
-  getRem(1920, 10);
+  getRem(3840, 10);
 }, 100);
 
 function getRem(pwidth, prem) {
